@@ -16,7 +16,7 @@ while True:
     input('')
     input('Press Enter to start:')
     #convert this into type int
-    desired_rate = int(buffer)
+    desired_rate = int.from_bytes(buffer, 'big')
     print(desired_rate)
     #waiting to differentiate between desired and measured
     time.sleep(1)
