@@ -11,7 +11,7 @@ adcA = ADC(Pin(26))
 adcB = ADC(Pin(27))
 #LED pins
 led1 = PWM(Pin(20))
-led2 = PWM(Pin(17))
+led2 = PWM(Pin(16))
 led3 = PWM(Pin(18))
 #LED frequency to see blinking
 led1.freq(20)
