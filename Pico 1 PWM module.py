@@ -10,9 +10,9 @@ uart.init(bits=8, parity=None, stop=1, txbuf=64, rxbuf=64, timeout=2000)
 adcA = ADC(Pin(26))
 adcB = ADC(Pin(27))
 #LED pins
-led1 = PWM(Pin(18))
-led2 = PWM(Pin(16))
-led3 = PWM(Pin(17))
+led1 = PWM(Pin(20))
+led2 = PWM(Pin(17))
+led3 = PWM(Pin(18))
 #LED frequency to see blinking
 led1.freq(20)
 led2.freq(20)
@@ -62,7 +62,8 @@ while True:
 
 #Setting frequency to be adjusted
 input('Set frequency with right dial and press enter')
-wave_value = adcA.read_u16()
+Wave_value = adcA.read_u16()
+wave_value = Wave_value
 print(wave_value)
 while not matches:
     #lights up LED for user comparison
@@ -88,7 +89,11 @@ while not matches:
         try:
             difference = int(data_return)
             #gets int value from bytes
-            wave_value = difference - wave_value
+            print('∆ =', difference, 'wV =', wave_value)
+            if desired_value < wave_value:
+                wave_value = difference - wave_value
+            elif desired_value > wave_value:
+                wave_value = difference + wave_value
         #if fails starts over
         except  ValueError:
             print('TypeError')
