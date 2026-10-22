@@ -11,9 +11,9 @@ uart.init(bits=8, parity=None, stop=1, txbuf=64, rxbuf=64, timeout=2500)
 Matches = False
 
 #=============================================================================
-to_write = 'Hello'
-uart.write(str(to_write))
-time.sleep_ms(100)
+#to_write = '12345'
+#uart.write(str(to_write))
+#time.sleep_ms(100)
 #=============================================================================
 
 def reading():
@@ -43,17 +43,18 @@ while True:
         #buffer = b'\x00' * len(buffer)
         given_rate = reading()
         print(given_rate, type(given_rate))
-        if given_rate != 0:
-            if given_rate == desired_rate:
-                Matches = True
-                #sends confirmation to other Pico
-                uart.write(str(Matches))
-            else:
-                #math for difference
-                correction =  given_rate - desired_rate
-                #sends correction to other Pico
-                uart.write(str(correction))
+        if given_rate == desired_rate:
+            Matches = True
+            #sends confirmation to other Pico
+            uart.write(str(Matches))
+            break
         else:
-            #delays to not overload buffer
-            time.sleep(1)
-            continue
+            #math for difference
+            print('gR =', given_rate, 'dR =', desired_rate)
+            correction = abs(desired_rate - given_rate)
+            print('correction =', correction)
+            uart.write(str(correction))
+            #sends correction to other Pico
+    if Matches:
+        print('complete')
+        break
