@@ -18,22 +18,24 @@ led1.freq(20)
 led2.freq(20)
 led3.freq(20)
 
-#Input variable
 #Bool to end loop
 matches = False
 #Buffer to store data communicated
 
-#works with all use cases
+#function to read incoming data and format into str
+#str and not int for Bool or int return values
 def reading():
     # Gemini sourced
+    #buffer created to read off
     buffer = bytearray(8)
     while True:
+        #only reads if there's data in buffer
         if uart.any():
-            print('p')
+            #reads into buffer
             bytes_read = uart.readinto(buffer)
+            #if data read into buffer, it saves data points from buffer
             if bytes_read:
-                print('e')
-                # convert this into type int
+                #decodes bytes to string
                 rate = buffer[:bytes_read].decode("utf-8")
                 break
     # waiting to differentiate between desired and measured
@@ -42,29 +44,44 @@ def reading():
 
 #while loop prompting an input frequency
 while True:
+    #issues of code skipping input prompt, this triggers the skip before important prompts
     input('')
-    #automatically continues w/ out pressing enter on first loop
     input('Set desired frequency with left dial and press enter:')
     desired_value = adcB.read_u16()
     freq_user_input = input(f'Is {desired_value} correct? y/n\n')
+    #user picks 'n' to go back
     if freq_user_input == 'n':
         print('Adjust frequency and try again.')
-    #Sends target frequency to Pico Board 2
+    #user picks 'y' to send target frequency to pico 2
     elif freq_user_input == 'y':
-        #type error: object with buffer protocol required
+        #Sends target frequency to Pico Board 2 as a string
         uart.write(str(desired_value))
+        #lights up an LED for visual comparison
         led1.duty_u16(desired_value)
         #Sleep to ensure data isn't mixed
         time.sleep(1)
         break
+    #reprompts user if invalid response
     else:
         print('enter valid input')
 
-#Setting frequency to be adjusted
-input('Set frequency with right dial and press enter')
-Wave_value = adcA.read_u16()
-wave_value = Wave_value
-print(wave_value)
+#Setting 'scrambled' frequency reprompting
+while True:
+    input('Set desired frequency with right dial and press enter:')
+    Wave_value = adcA.read_u16()
+    freq_user_input = input(f'Is {Wave_value} correct? y/n\n')
+    #user picks 'n' to go back
+    if freq_user_input == 'n':
+        print('Adjust frequency and try again.')
+    #user picks 'y' to send target frequency to pico 2
+    elif freq_user_input == 'y':
+        #Saves variable for comparison later on
+        wave_value = Wave_value
+        break
+    #reprompts user if invalid response
+    else:
+        print('enter valid input')
+#While loop running communication and adjustments, breaks when target == scrambled
 while not matches:
     #lights up LED for user comparison
     led2.duty_u16(wave_value)
@@ -76,27 +93,29 @@ while not matches:
         print('sent\n')
     #Reads input from Pico Board 2
     data_return = reading()
-    #convert bytes to string before type checking
-    #displays info for debugging
-    print(data_return, type(data_return))
+#convert bytes to string before type checking
     # if type returned is boolean, will end program
     if data_return == 'True':
         matches = True
         break
-    #if type returned is int, it will keep looping until returned type is a boolean
+    #if type returned can be typecast int, it will keep looping until returned type is the string 'True'
     else:
         #tries converting string to int
+        #if it works, will proceed with adjusting wave
         try:
+            # gets int value from bytes
             difference = int(data_return)
-            #gets int value from bytes
             print('∆ =', difference, 'wV =', wave_value)
+            #if scrambled value was above the target, it will subtract the absolute difference
             if desired_value < wave_value:
                 wave_value = difference - wave_value
+            # if scrambled value was below the target, it will add the absolute difference
             elif desired_value > wave_value:
                 wave_value = difference + wave_value
         #if fails starts over
         except  ValueError:
             print('TypeError')
+#if wave_value == desired_value, program ends
 print('complete')
-#LEDs 16 & 17 should be blinking at the same rate
+#LEDs 20 & 17 should be blinking at the same rate (red)
 led3.duty_u16(wave_value)

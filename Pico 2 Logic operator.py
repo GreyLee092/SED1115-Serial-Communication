@@ -16,16 +16,19 @@ Matches = False
 #time.sleep_ms(100)
 #=============================================================================
 
+#function reading incoming data into integers
 def reading():
     # Gemini sourced
+    #buffer created to read off
     buffer = bytearray(8)
     while True:
+        # only reads if there's data in buffer and loops here until data is read
         if uart.any():
-            print('p')
+            # reads into buffer
             bytes_read = uart.readinto(buffer)
+            # if data read into buffer, it saves data points from buffer
             if bytes_read:
-                print('e')
-                # convert this into type int
+                #decodes bytes to int
                 rate = int(buffer[:bytes_read].decode("utf-8"))
                 break
     # waiting to differentiate between desired and measured
@@ -34,27 +37,27 @@ def reading():
 
 
 while True:
+    #waits until data is able to read
     desired_rate = reading()
-    print(desired_rate, type(desired_rate))
     while not Matches:
-        #stores X# of bits, enough to define the digits in a PCM wave, shorter=better
-        #storage buffer for input, method from stack overflow
-        #given_rate = int.from_bytes(buffer, 'big')
-        #buffer = b'\x00' * len(buffer)
+        #waits until scrambled data is read off buffer
         given_rate = reading()
-        print(given_rate, type(given_rate))
+        #if rates are same, bool is switched to kill loop and sent to pico 1 to do the same
         if given_rate == desired_rate:
             Matches = True
-            #sends confirmation to other Pico
+            #sends confirmation to other Pico as string
             uart.write(str(Matches))
             break
+        #otherwise will measure the difference
         else:
             #math for difference
-            print('gR =', given_rate, 'dR =', desired_rate)
+            print('Given Rate =', given_rate, 'Desired Rate =', desired_rate)
+            #calculates absolute difference of values
             correction = abs(desired_rate - given_rate)
             print('correction =', correction)
+            #Returns correction value to pico 1 as a string
             uart.write(str(correction))
-            #sends correction to other Pico
+    #if bool is True, will terminate program
     if Matches:
         print('complete')
         break
