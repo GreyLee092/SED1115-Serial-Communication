@@ -1,3 +1,4 @@
+#Run Pico 2 Logic operator program before starting Pico 1 PWM module
 #based on adc-pwm lab code
 from machine import Pin, PWM, ADC, UART
 import time
@@ -38,6 +39,7 @@ def reading():
                 #decodes bytes to string
                 rate = buffer[:bytes_read].decode("utf-8")
                 break
+
     # waiting to differentiate between desired and measured
     time.sleep(1)
     return rate
@@ -117,5 +119,5 @@ while not matches:
             print('TypeError')
 #if wave_value == desired_value, program ends
 print('complete')
-#LEDs 20 & 17 should be blinking at the same rate (red)
+#LEDs 20 & 16 should be blinking at the same rate (red)
 led3.duty_u16(wave_value)

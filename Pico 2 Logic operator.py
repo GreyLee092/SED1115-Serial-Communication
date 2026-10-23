@@ -1,3 +1,4 @@
+#Pico 2 code should be running before Pico 1 sends any input frequencies
 #Code for second pico to interpret data structure before sending correcting or code terminating signals
 
 from machine import UART, Pin
@@ -52,7 +53,7 @@ while True:
         else:
             #math for difference
             print('Given Rate =', given_rate, 'Desired Rate =', desired_rate)
-            #calculates absolute difference of values
+            #calculates absolute difference of desired input frequency and given input frequency
             correction = abs(desired_rate - given_rate)
             print('correction =', correction)
             #Returns correction value to pico 1 as a string
